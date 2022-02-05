@@ -122,7 +122,7 @@ Query to insert corresponding data into table users. Also do not update data whe
 user_table_insert = ("""
     insert into users (user_id, first_name, last_name, gender, level)
     values (%s, %s, %s, %s, %s)
-    on conflict (user_id) do nothing;
+    on conflict (user_id) do update set level = excluded.level;
 """)
 
 """
