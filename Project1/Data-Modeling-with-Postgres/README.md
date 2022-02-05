@@ -10,15 +10,16 @@
 ## How to run the Python scripts:
 * Since the script is automately looking fore the data source path, user just run the scripts in the following step:
     0. Prepare the SQL querries in **sql_queries.py**: 
-        * This script contains all the queries to operate all the database schema's construction and ETL process. 
+    * This script contains all the queries to operate all the database schema's construction and ETL process. 
     1. Run the **create_tables.py** script:
-        * Run this script to create and open the connection with the database, also create:
-            * **Fact table:** songplays table.
-            * **Dimension Tables:**
-                1. **users** table
-                2. **songs** table
-                3. **artists** table
-                4. **time** table
+    * Run this script to create and open the connection with the database, also create:
+        * **Fact table:** 
+            1. **songplays** table.
+        * **Dimension Tables:**
+            1. **users** table
+            2. **songs** table
+            3. **artists** table
+            4. **time** table
         * These tables are connected in the *star schema* diagram.
     2. Run the **etl.py** script:
         * Run this script will convert (or move) the data from JSON file of all dataset (song dataset and log dataset) into corresponding tables.
