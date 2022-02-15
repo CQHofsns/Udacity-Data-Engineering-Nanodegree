@@ -7,13 +7,13 @@ config.read('dwh.cfg')
 
 # DROP TABLES
 
-staging_events_table_drop = "drop table if exists staging_event"
-staging_songs_table_drop = "drop table if exists staging_song"
-songplay_table_drop = "drop table if exists songplays"
-user_table_drop = "drop table if exists users"
-song_table_drop = "drop table if exists songs"
-artist_table_drop = "drop table if exists artists"
-time_table_drop = "drop table if exists time"
+staging_events_table_drop = "drop table if exists staging_event;"
+staging_songs_table_drop = "drop table if exists staging_song;"
+songplay_table_drop = "drop table if exists songplays;"
+user_table_drop = "drop table if exists users;"
+song_table_drop = "drop table if exists songs;"
+artist_table_drop = "drop table if exists artists;"
+time_table_drop = "drop table if exists time;"
 
 # CREATE TABLES
 
@@ -37,7 +37,7 @@ staging_events_table_create= ("""
             ts timestamp,
             userAgent text,
             userId varchar(100)
-    )
+    );
 """)
 
 staging_songs_table_create = ("""
@@ -52,7 +52,7 @@ staging_songs_table_create = ("""
             title varchar(255),
             duration double precision,
             year integer
-    )
+    );
 """)
 
 songplay_table_create = ("""
@@ -66,7 +66,7 @@ songplay_table_create = ("""
             session_id bigint,
             location varchar(255),
             user_agent text
-    )
+    );
 """)
 
 user_table_create = ("""
@@ -76,7 +76,7 @@ user_table_create = ("""
             last_name varchar(50),
             gender varchar(1),
             level varchar(10)
-    )
+    ) diststyle all;
 """)
 
 song_table_create = ("""
@@ -86,7 +86,7 @@ song_table_create = ("""
             artist_id varchar(50),
             year integer,
             duration double precision
-    )
+    ) diststyle all;
 """)
 
 artist_table_create = ("""
@@ -96,7 +96,7 @@ artist_table_create = ("""
             location varchar(255),
             latitude double precision,
             longitude double precision
-    )
+    ) diststyle all;
 """)
 
 time_table_create = ("""
@@ -108,20 +108,21 @@ time_table_create = ("""
             month integer,
             year integer,
             weekday integer
-    )
+    ) diststyle all;
 """)
 
 # STAGING TABLES
 ## COPY params explain: https://docs.aws.amazon.com/redshift/latest/dg/copy-usage_notes-copy-from-json.html
 staging_events_copy = ("""
     copy staging_event from {} 
-    credentials 'aws_iam_role={}' 
+    credentials 'aws_iam_role={}'
+    timeformat as 'epochmillisecs'
     format as json {} 
     region 'us-west-2';
 """).format(config.get('S3', 'LOG_DATA'), config.get('IAM_ROLE', 'ARN'), config.get('S3', 'LOG_JSONPATH'))
 
 staging_songs_copy = ("""
-    copy stagind_song from {} 
+    copy staging_song from {} 
     credentials 'aws_iam_role={}' 
     format as json 'auto' 
     region 'us-west-2';
@@ -133,29 +134,29 @@ songplay_table_insert = ("""
 insert into songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
 select
     se.ts,
-    se.user_id,
+    se.userId,
     se.level,
     ss.song_id,
     ss.artist_id,
-    se.session_id,
-    ss.location,
-    se.user_agent
+    se.sessionId,
+    ss.artist_location,
+    se.userAgent
 from 
     staging_event as se,
     staging_song as ss
 where
     se.page = 'NextSong' and
-    se.artist_name = ss.artist_name and
+    se.artist = ss.artist_name and
     se.song = ss.title and
     se.length = ss.duration
 """)
 
 user_table_insert = ("""
-insert into table users (user_id, first_name, last_name, gender, level)
+insert into users (user_id, first_name, last_name, gender, level)
 select
-    user_id,
-    first_name,
-    last_name,
+    userId,
+    firstName,
+    lastName,
     gender,
     level
 from
@@ -201,7 +202,7 @@ select
     extract(week from start_time),
     extract(month from start_time),
     extract(year from start_time),
-    extract(dayofweek from start_time),
+    extract(dayofweek from start_time)
 from
     songplays
 """)
