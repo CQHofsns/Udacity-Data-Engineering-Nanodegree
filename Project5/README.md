@@ -16,8 +16,8 @@
 4. Data quality evaluation phase: Using SQL to get all the record of each table, then evaluate the quality of the data.
 
 ## How to run this project:
-1. Need to run the '''create_tables.py''' to drop all the existing tables in the Redshift cluster and create new one.
-2. Use '''/opt/airflow/start.sh''' to make a connection and create an Airflow server
+1. Need to run the ```create_tables.py``` to drop all the existing tables in the Redshift cluster and create new one.
+2. Use ```/opt/airflow/start.sh``` to make a connection and create an Airflow server
 3. At the Airflow server,create AWS credential variable and Redshift cluster variable.
 5. Monitoring the pipeline and check error.
 
