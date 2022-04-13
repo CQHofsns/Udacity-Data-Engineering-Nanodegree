@@ -11,7 +11,7 @@ class StageToRedshiftOperator(BaseOperator):
         FROM '{}'
         ACCESS_KEY_ID '{}'
         SECRET_ACCESS_KEY '{}'
-        FORMAT AS JSON {}
+        FORMAT AS JSON '{}'
     """
 
     @apply_defaults
@@ -19,7 +19,7 @@ class StageToRedshiftOperator(BaseOperator):
                  # Define your operators params (with defaults) here
                  # Example:
                  redshift_conn_id= '',
-                 aws_credentials_id= '',
+                 aws_credentials= '',
                  s3_bucket= '',
                  s3_key= '',
                  rs_table= '',
@@ -31,7 +31,7 @@ class StageToRedshiftOperator(BaseOperator):
         # Example:
         # self.conn_id = conn_id
         self.redshift_conn_id= redshift_conn_id
-        self.aws_credentials_id= aws_credentials_id
+        self.aws_credentials= aws_credentials
         self.s3_bucket= s3_bucket
         self.s3_key= s3_key
         self.rs_table= rs_table
@@ -39,12 +39,12 @@ class StageToRedshiftOperator(BaseOperator):
         
     def execute(self, context):
         #self.log.info('StageToRedshiftOperator not implemented yet')
-        aws_hook= AwsHook(self.aws_credentials_id)
-        aws_credentials= aws_hook.get_credential()
+        aws_hook= AwsHook(self.aws_credentials)
+        aws_credentials= aws_hook.get_credentials()
         redshift_hook= PostgresHook(postgres_conn_id= self.redshift_conn_id)
         
         # Clean all table that exist from the last session
-        redshift.run(f'delete from {self.rs_table}')
+        redshift_hook.run(f'delete from {self.rs_table}')
         
         # Get render_key to determine S3 bucket target location
         render_key= self.s3_key.format(**context)

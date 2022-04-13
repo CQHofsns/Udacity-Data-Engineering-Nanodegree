@@ -7,9 +7,9 @@ class LoadDimensionOperator(BaseOperator):
     ui_color = '#80BD9E'
     
     INSERT_DIMENSION_TABLE_SQL= """
-        TRUNCATE TABLE {}
+        TRUNCATE TABLE {};
         INSERT INTO {}
-        {}
+        {};
     """
 
     @apply_defaults
@@ -36,8 +36,8 @@ class LoadDimensionOperator(BaseOperator):
         redshift_hook= PostgresHook(postgres_conn_id= self.redshift_conn_id)
         
         dimension_table_load_sql= LoadDimensionOperator.INSERT_DIMENSION_TABLE_SQL.format(
-            self.fact_table,
-            self.fact_table,
+            self.dimension_table,
+            self.dimension_table,
             self.load_dimension_sql
         )
         

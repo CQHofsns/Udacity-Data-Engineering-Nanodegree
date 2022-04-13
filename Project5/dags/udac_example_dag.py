@@ -17,13 +17,17 @@ default_args = {
     'email_on_retry': False
 }
 
-dag = DAG('udac_example_dag',
-          default_args=default_args,
-          description='Load and transform data in Redshift with Airflow',
-          schedule_interval='0 * * * *'
-        )
+dag = DAG(
+    'udac_example_dag',
+    default_args=default_args,
+    description='Load and transform data in Redshift with Airflow',
+    schedule_interval='0 * * * *'
+)
 
-start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
+start_operator = DummyOperator(
+    task_id='Begin_execution',
+    dag=dag
+)
 
 stage_events_to_redshift = StageToRedshiftOperator(
     task_id= 'Stage_events',
