@@ -14,7 +14,10 @@ default_args = {
     'start_date': datetime(2019, 1, 12),
     'retries': 3,
     'retry_delay': timedelta(minutes=5),
-    'email_on_retry': False
+    'email_on_retry': False,
+    'email_on_failure': False,
+    'depends_on_past': False,
+    'catchup': False
 }
 
 dag = DAG(
@@ -64,7 +67,8 @@ load_user_dimension_table = LoadDimensionOperator(
     dag=dag,
     redshift_conn_id= 'redshift',
     dimension_table= 'users',
-    load_dimension_sql= SqlQueries.user_table_insert 
+    load_dimension_sql= SqlQueries.user_table_insert,
+    append= 'yes'
 )
 
 load_song_dimension_table = LoadDimensionOperator(
@@ -72,7 +76,8 @@ load_song_dimension_table = LoadDimensionOperator(
     dag=dag,
     redshift_conn_id= 'redshift',
     dimension_table= 'songs',
-    load_dimension_sql= SqlQueries.song_table_insert
+    load_dimension_sql= SqlQueries.song_table_insert,
+    append= 'yes'
 )
 
 load_artist_dimension_table = LoadDimensionOperator(
@@ -80,7 +85,8 @@ load_artist_dimension_table = LoadDimensionOperator(
     dag=dag,
     redshift_conn_id= 'redshift',
     dimension_table= 'artists',
-    load_dimension_sql= SqlQueries.artist_table_insert
+    load_dimension_sql= SqlQueries.artist_table_insert,
+    append= 'yes'
 )
 
 load_time_dimension_table = LoadDimensionOperator(
@@ -88,14 +94,21 @@ load_time_dimension_table = LoadDimensionOperator(
     dag=dag,
     redshift_conn_id= 'redshift',
     dimension_table= 'time',
-    load_dimension_sql= SqlQueries.time_table_insert
+    load_dimension_sql= SqlQueries.time_table_insert,
+    append= 'yes'
 )
 
 run_quality_checks = DataQualityOperator(
     task_id='Run_data_quality_checks',
     dag=dag,
     redshift_conn_id= 'redshift',
-    check_table_list= ['songplays', 'users', 'artists', 'songs', 'time']
+    check_table_sql= [
+        {'check_sql': 'SELECT COUNT(*) FROM songplays WHERE playid IS NULL', 'exptected_result': 0}, 
+        {'check_sql': 'SELECT COUNT(*) FROM users WHERE userid IS NULL', 'exptected_result': 0}, 
+        {'check_sql': 'SELECT COUNT(*) FROM artists WHERE artistid IS NULL', 'exptected_result': 0}, 
+        {'check_sql': 'SELECT COUNT(*) FROM songs WHERE songid IS NULL', 'exptected_result': 0}, 
+        {'check_sql': 'SELECT COUNT(*) FROM time WHERE timestamp IS NULL', 'exptected_result': 0}
+    ]
 )
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
