@@ -20,6 +20,7 @@ class LoadDimensionOperator(BaseOperator):
                  redshift_conn_id= '',
                  dimension_table= '',
                  load_dimension_sql= '',
+                 append= '',
                  *args, **kwargs):
 
         super(LoadDimensionOperator, self).__init__(*args, **kwargs)
@@ -29,16 +30,21 @@ class LoadDimensionOperator(BaseOperator):
         self.redshift_conn_id= redshift_conn_id
         self.dimension_table= dimension_table
         self.load_dimension_sql= load_dimension_sql
-
+        self.append= append
+        
     def execute(self, context):
         #self.log.info('LoadDimensionOperator not implemented yet')
         
         redshift_hook= PostgresHook(postgres_conn_id= self.redshift_conn_id)
         
-        dimension_table_load_sql= LoadDimensionOperator.INSERT_DIMENSION_TABLE_SQL.format(
-            self.dimension_table,
-            self.dimension_table,
-            self.load_dimension_sql
-        )
+        if self.append== 'no':
+            redshift_hook.run('DELETE FROM {}'.format(self.dimension_table))
         
-        redshift_hook.run(dimension_table_load_sql)
+        elif self.append== 'yes':
+            dimension_table_load_sql= LoadDimensionOperator.INSERT_DIMENSION_TABLE_SQL.format(
+                self.dimension_table,
+                self.dimension_table,
+                self.load_dimension_sql
+            )
+        
+            redshift_hook.run(dimension_table_load_sql)
